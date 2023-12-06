@@ -5,7 +5,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-@ValidatorConstraint({ name: 'passwordStrength', async: false })
+@ValidatorConstraint({ name: 'PasswordStrength', async: false })
 export class PasswordStrengthConstraint
   implements ValidatorConstraintInterface
 {

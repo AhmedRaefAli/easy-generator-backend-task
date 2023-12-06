@@ -17,14 +17,14 @@ import { Response, Request } from 'express';
 import { LoginDto } from './validators/login-validator';
 import { RegisterDto } from './validators/register-validation';
 import { UserDto } from './dto/user.dto';
-import { JWTGuard } from 'src/guards/jwt.guard';
+import { JWTGuard } from 'src/auth/guards/jwt.guard';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(
-    private readonly appService: AuthService,
+    private readonly AuthService: AuthService,
     private jwtService: JwtService,
   ) {}
 
@@ -33,7 +33,14 @@ export class AuthController {
   async register(@Body() data: RegisterDto, @Res() response: Response) {
     const hashedPassword = await bcrypt.hash(data.password, 12);
 
-    const user = await this.appService.create({
+    const Existuser = await this.AuthService.findOne({
+      where: { email: data.email },
+    });
+
+    if(Existuser){
+      throw new BadRequestException('email must be unique')
+    }
+    const user = await this.AuthService.create({
       name: data.name,
       email: data.email,
       password: hashedPassword,
@@ -42,7 +49,7 @@ export class AuthController {
     return response.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: 'Registered',
-      data: user,
+      data: user as UserDto,
     });
   }
 
@@ -52,7 +59,7 @@ export class AuthController {
     @Body() data: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const user = await this.appService.findOne({
+    const user = await this.AuthService.findOne({
       where: { email: data.email },
     });
 
@@ -87,7 +94,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     try {
-      const user = await this.appService.findOne({
+      const user = await this.AuthService.findOne({
         where: { id: request['user'].id },
       });
 

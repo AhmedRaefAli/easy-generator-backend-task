@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cors from 'cors';
 import helmet from 'helmet';
 import * as dotenv from 'dotenv';
+import { ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './filter/bad-req-filter';
 
 async function bootstrap() {
   dotenv.config();
@@ -13,7 +15,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableCors({
-    origin: 'http://localhost:8080',
+    origin: 'http://localhost:3001',
     credentials: true,
   });
 
@@ -29,6 +31,11 @@ async function bootstrap() {
 
   app.use(cors());
   app.use(helmet());
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(
+    new HttpExceptionFilter(),
+  );
+
   await app.listen(3000);
 }
 
