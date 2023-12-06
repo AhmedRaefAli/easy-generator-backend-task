@@ -38,7 +38,7 @@ export class AuthController {
     });
 
     if(Existuser){
-      throw new BadRequestException('email must be unique')
+      throw new BadRequestException(['email must be unique'])
     }
     const user = await this.AuthService.create({
       name: data.name,
@@ -57,7 +57,7 @@ export class AuthController {
   @ApiOkResponse({ description: 'loggedIn' })
   async login(
     @Body() data: LoginDto,
-    @Res({ passthrough: true }) response: Response,
+    @Res() response: Response,
   ) {
     const user = await this.AuthService.findOne({
       where: { email: data.email },
@@ -75,7 +75,7 @@ export class AuthController {
       { id: user.id },
       { expiresIn: '1h', secret: process.env.JWT_SECRET },
     );
-
+    console.log('here')
     return response.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: 'loggedIn',
@@ -91,7 +91,7 @@ export class AuthController {
   @ApiOkResponse({ description: 'current user' })
   async user(
     @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
+    @Res() response: Response,
   ) {
     try {
       const user = await this.AuthService.findOne({
@@ -112,7 +112,7 @@ export class AuthController {
 
   @Post('logout')
   @ApiOkResponse()
-  async logout(@Res({ passthrough: true }) response: Response) {
+  async logout(@Res() response: Response) {
     //delete refresh token
     return {
       message: 'success',
