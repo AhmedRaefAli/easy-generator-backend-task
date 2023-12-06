@@ -40,7 +40,7 @@ describe('authService', () => {
       const expectedResult: UserDto = {
         name: 'ahmed raef',
         email: 'ahmedraef806@gmail.com',
-        id: 1,
+        id: '$2b$12$sXy41s14ihlAABwSeFvMSeqQdU7qJ9R.IuwZSdAgovVoE7Yjxp5Vi',
       };
 
       userRepository.createUser.mockResolvedValue(expectedResult);
