@@ -1,24 +1,24 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { DataSource, FindOneOptions, Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { Injectable } from '@nestjs/common';
 import { RegisterDto } from './validators/register-validation';
-import { UserDto } from './dto/user.dto';
-import { error } from 'console';
+import { InjectModel } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
+import { UserDoc } from './schema/user.entity';
+import { Model } from 'mongoose';
 
 @Injectable()
-export class UserRepository extends Repository<User> {
-  constructor(protected dataSource: DataSource) {
-    super(User, dataSource.createEntityManager());
-  }
+export class UserRepository {
+  constructor(@InjectModel(UserDoc.name) private catModel: Model<UserDoc>) {}
 
-  async createUser(userDto: RegisterDto): Promise<UserDto> {
-    const user = await super.save(super.create({ ...userDto })).catch(error=>{
-      throw new BadRequestException(error.message)
+  async createUser(createCatDto: RegisterDto): Promise<UserDoc> {
+    const createdCat = new this.catModel({
+      ...createCatDto,
+      _id: new mongoose.Types.ObjectId(),
     });
-    return user;
+    return createdCat.save();
   }
 
-  async findOne(condition: Partial<FindOneOptions<User>>): Promise<User> {
-    return super.findOne(condition);
+  async findOne(condition: Partial<UserDoc>): Promise<UserDoc> {
+    const createdCat = this.catModel.findOne(condition);
+    return createdCat;
   }
 }

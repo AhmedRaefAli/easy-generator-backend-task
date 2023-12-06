@@ -33,12 +33,10 @@ export class AuthController {
   async register(@Body() data: RegisterDto, @Res() response: Response) {
     const hashedPassword = await bcrypt.hash(data.password, 12);
 
-    const Existuser = await this.AuthService.findOne({
-      where: { email: data.email },
-    });
+    const Existuser = await this.AuthService.findOne({});
 
-    if(Existuser){
-      throw new BadRequestException(['email must be unique'])
+    if (Existuser) {
+      throw new BadRequestException(['email must be unique']);
     }
     const user = await this.AuthService.create({
       name: data.name,
@@ -46,22 +44,22 @@ export class AuthController {
       password: hashedPassword,
     });
 
+    const userDto: UserDto = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    };
     return response.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: 'Registered',
-      data: user as UserDto,
+      data: userDto,
     });
   }
 
   @Post('login')
   @ApiOkResponse({ description: 'loggedIn' })
-  async login(
-    @Body() data: LoginDto,
-    @Res() response: Response,
-  ) {
-    const user = await this.AuthService.findOne({
-      where: { email: data.email },
-    });
+  async login(@Body() data: LoginDto, @Res() response: Response) {
+    const user = await this.AuthService.findOne({ email: data.email });
 
     if (!user) {
       throw new BadRequestException('invalid credentials');
@@ -72,15 +70,20 @@ export class AuthController {
     }
 
     const jwt = await this.jwtService.signAsync(
-      { id: user.id },
+      { id: user._id },
       { expiresIn: '1h', secret: process.env.JWT_SECRET },
     );
-    console.log('here')
+    // Map the User document to UserDto
+    const userDto: UserDto = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    };
     return response.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: 'loggedIn',
       data: {
-        user: user as UserDto,
+        user: userDto,
         token: jwt,
       },
     });
@@ -89,20 +92,20 @@ export class AuthController {
   @UseGuards(JWTGuard)
   @Get('user')
   @ApiOkResponse({ description: 'current user' })
-  async user(
-    @Req() request: Request,
-    @Res() response: Response,
-  ) {
+  async user(@Req() request: Request, @Res() response: Response) {
     try {
-      const user = await this.AuthService.findOne({
-        where: { id: request['user'].id },
-      });
-
+      const user = await this.AuthService.findOne({ _id: request['user'].id });
+      // Map the User document to UserDto
+      const userDto: UserDto = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      };
       return response.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'current user',
         data: {
-          user: user as UserDto,
+          user: userDto,
         },
       });
     } catch (e) {
