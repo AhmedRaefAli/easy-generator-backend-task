@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
 
 @Schema({ timestamps: true ,collection: 'users'})
 export class UserDoc {
