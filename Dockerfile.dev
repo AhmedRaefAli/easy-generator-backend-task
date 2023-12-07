@@ -1,0 +1,15 @@
+FROM node:alpine
+
+WORKDIR /usr/local/app
+
+COPY tsconfig.json package.json /usr/local/app/
+
+RUN npm i -g @nestjs/cli
+
+RUN npm install
+
+COPY ./src /usr/local/app/src
+
+EXPOSE 3000
+
+CMD npm run start
