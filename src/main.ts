@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import * as dotenv from 'dotenv';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filter/bad-req-filter';
+import * as compression from 'compression';
 
 async function bootstrap() {
   dotenv.config();
@@ -31,10 +32,10 @@ async function bootstrap() {
 
   app.use(cors());
   app.use(helmet());
+  app.use(compression());
+
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalFilters(
-    new HttpExceptionFilter(),
-  );
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(3000);
 }
