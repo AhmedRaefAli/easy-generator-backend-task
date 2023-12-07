@@ -8,7 +8,7 @@ export class RegisterDto {
   name: string;
 
   @ApiProperty()
-  @IsEmail()
+  @IsEmail({}, { message: 'email must be an valid email' })
   @IsNotEmpty()
   email: string;
 
