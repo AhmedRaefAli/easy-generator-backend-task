@@ -20,7 +20,6 @@ export class PasswordStrengthConstraint
       return false;
     }
 
-    // Check character categories
     const lowercaseRegex = /[a-z]/;
     const uppercaseRegex = /[A-Z]/;
     const numericRegex = /\d/;

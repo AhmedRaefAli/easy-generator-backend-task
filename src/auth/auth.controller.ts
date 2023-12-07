@@ -28,6 +28,9 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
+  /*
+  * this is and enpoint to Register new user to the system and encrypt the password in db 
+  */
   @Post('register')
   @ApiOkResponse({ description: 'registered' })
   async register(@Body() data: RegisterDto, @Res() response: Response) {
@@ -56,6 +59,9 @@ export class AuthController {
     });
   }
 
+  /*
+  * this is and enpoint to login the user on system and send jwt token  
+  */
   @Post('login')
   @ApiOkResponse({ description: 'loggedIn' })
   async login(@Body() data: LoginDto, @Res() response: Response) {
@@ -73,7 +79,6 @@ export class AuthController {
       { id: user._id },
       { expiresIn: '1h', secret: process.env.JWT_SECRET },
     );
-    // Map the User document to UserDto
     const userDto: UserDto = {
       id: user._id,
       name: user.name,
@@ -89,14 +94,17 @@ export class AuthController {
     });
   }
 
+  /*
+  * this is and enpoint to get cuurent user data 
+  * with authenticated guard to be used by only logged in user
+  */
   @UseGuards(JWTGuard)
   @Get('user')
   @ApiOkResponse({ description: 'current user' })
   async user(@Req() request: Request, @Res() response: Response) {
     try {
       const user = await this.AuthService.findOne({ _id: request['user'].id });
-      // Map the User document to UserDto
-      const userDto: UserDto = {
+        const userDto: UserDto = {
         id: user._id,
         name: user.name,
         email: user.email,
@@ -113,6 +121,15 @@ export class AuthController {
     }
   }
 
+  // not required in company task TODO 
+
+  // 1- regenerate access token from refresh token
+
+
+  /*
+  * 2- this is and enpoint to logout the TO DO in register we shoud created for user refresh token 
+  * this endpoint should remove it 
+  */
   @Post('logout')
   @ApiOkResponse()
   async logout(@Res() response: Response) {

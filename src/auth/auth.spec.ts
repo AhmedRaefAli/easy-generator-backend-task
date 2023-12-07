@@ -25,12 +25,12 @@ describe('authService', () => {
     userRepository = module.get<MockUserRepository>(UserRepository);
   });
 
-  it('should be defined', () => {
+  it('service should be defined', () => {
     expect(service).toBeDefined();
   });
 
   describe('auth/register', () => {
-    it('register new user', async () => {
+    it('should register new user to the system', async () => {
       const data: RegisterDto = {
         name: 'ahmed raef',
         email: 'ahmedraef806@gmail.com',

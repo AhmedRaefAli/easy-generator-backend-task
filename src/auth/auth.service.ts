@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RegisterDto } from './validators/register-validation';
 import { UserRepository } from './auth.repository';
-import { UserDoc } from './schema/user.entity';
+import { UserDoc } from './schema/user.schema';
 
 @Injectable()
 export class AuthService {

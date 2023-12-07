@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RegisterDto } from './validators/register-validation';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { UserDoc } from './schema/user.entity';
+import { UserDoc } from './schema/user.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
