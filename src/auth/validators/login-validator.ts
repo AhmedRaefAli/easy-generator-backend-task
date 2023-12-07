@@ -7,7 +7,7 @@ import {
 
 export class LoginDto {
   @ApiProperty()
-  @IsEmail()
+  @IsEmail({}, { message: 'email must be an valid email' })
   @IsNotEmpty()
   email: string;
 
