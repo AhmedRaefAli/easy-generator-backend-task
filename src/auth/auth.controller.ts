@@ -116,10 +116,8 @@ export class AuthController {
   @ApiOkResponse({ description: 'current user' })
   async user(@Req() request: Request, @Res() response: Response) {
     try {
-      console.log('herea')
 
       const user = await this.AuthService.findOne({ _id: request['user'].id });
-      console.log(user)
       const userDto: UserDto = {
         id: user._id,
         name: user.name,
