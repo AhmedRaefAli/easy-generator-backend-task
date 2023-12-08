@@ -40,7 +40,7 @@ export class AuthController {
     const Existuser = await this.AuthService.findOne({ email: data.email });
 
     if (Existuser) {
-      throw new BadRequestException(['email must be unique']);
+      throw new BadRequestException('email must be unique');
     }
     const user = await this.AuthService.create({
       name: data.name,
@@ -187,13 +187,13 @@ export class AuthController {
   async logout(@Req() request: Request, @Res() response: Response) {
     const user = await this.AuthService.findOne({ _id: request['user'].id });
     if (!user) {
-      throw new BadRequestException(['invalid user']);
+      throw new BadRequestException('invalid user');
     }
     this.AuthService.updateUser(user._id, {
       ...user,
       refreshToken: null,
     }).catch(err=>{
-      throw new BadRequestException(['faild to log out']);
+      throw new BadRequestException('faild to log out');
     });
 
     return response.status(HttpStatus.OK).json({
