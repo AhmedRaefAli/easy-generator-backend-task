@@ -5,13 +5,15 @@ import { JwtService } from '@nestjs/jwt';
 export class JWTGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
-      console.log('JWT GUARD');
       const request = context.switchToHttp().getRequest();
+      if (!request.headers.authorization) {
+        return false;
+      }
       const jwtToken = request.headers.authorization.replace('Bearer ', '');
-      const user = this.jwtService.verifyAsync(jwtToken, {
-        secret: process.env.JWT_SECRET
+      const user = await this.jwtService.verifyAsync(jwtToken, {
+        secret: process.env.JWT_SECRET,
       });
       request.user = user;
       return true;
