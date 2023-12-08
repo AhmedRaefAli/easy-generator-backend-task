@@ -7,18 +7,30 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class UserRepository {
-  constructor(@InjectModel(UserDoc.name) private catModel: Model<UserDoc>) {}
+  constructor(@InjectModel(UserDoc.name) private userModel: Model<UserDoc>) {}
 
-  async createUser(createCatDto: RegisterDto): Promise<UserDoc> {
-    const createdCat = new this.catModel({
-      ...createCatDto,
+  async createUser(createUserDto: RegisterDto): Promise<UserDoc> {
+    const createdUser = new this.userModel({
+      ...createUserDto,
       _id: new mongoose.Types.ObjectId(),
     });
-    return createdCat.save();
+    return createdUser.save();
   }
 
-  async findOne(condition: Partial<UserDoc>): Promise<UserDoc> {
-    const createdCat = this.catModel.findOne(condition);
-    return createdCat;
+  async findOne(condition: Partial<UserDoc>): Promise<UserDoc | null> {
+    return this.userModel.findOne(condition).exec();
+  }
+
+  async updateUser(
+    userId: string,
+    updateUserDto: Partial<RegisterDto>,
+  ): Promise<UserDoc | null> {
+    return this.userModel
+      .findByIdAndUpdate(userId, updateUserDto, { new: true })
+      .exec();
+  }
+
+  async deleteUser(userId: string) {
+    return this.userModel.findByIdAndDelete(userId).exec();
   }
 }

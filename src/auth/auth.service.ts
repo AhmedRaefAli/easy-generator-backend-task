@@ -14,4 +14,15 @@ export class AuthService {
   async findOne(condition: Partial<UserDoc>): Promise<UserDoc> {
     return this.userRepository.findOne(condition);
   }
+
+  async updateUser(
+    userId: string,
+    updateUserDto: Partial<UserDoc>,
+  ): Promise<UserDoc | null> {
+    return this.userRepository.updateUser(userId, updateUserDto);
+  }
+
+  async deleteUser(userId: string) {
+    return this.userRepository.deleteUser(userId);
+  }
 }

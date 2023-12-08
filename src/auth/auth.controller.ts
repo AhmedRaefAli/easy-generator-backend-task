@@ -36,7 +36,7 @@ export class AuthController {
   async register(@Body() data: RegisterDto, @Res() response: Response) {
     const hashedPassword = await bcrypt.hash(data.password, 12);
 
-    const Existuser = await this.AuthService.findOne({});
+    const Existuser = await this.AuthService.findOne({ email: data.email });
 
     if (Existuser) {
       throw new BadRequestException(['email must be unique']);
@@ -79,17 +79,30 @@ export class AuthController {
       { id: user._id },
       { expiresIn: '1h', secret: process.env.JWT_SECRET },
     );
+
+    const refreshToken = await this.jwtService.signAsync(
+      { id: user._id },
+      { expiresIn: '7d', secret: process.env.JWT_SECRET_REF },
+    );
+
+    this.AuthService.updateUser(user._id, {
+      ...user,
+      refreshToken: refreshToken,
+    });
+
     const userDto: UserDto = {
       id: user._id,
       name: user.name,
       email: user.email,
     };
+
     return response.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: 'loggedIn',
       data: {
         user: userDto,
         token: jwt,
+        refreshToken,
       },
     });
   }
@@ -103,7 +116,10 @@ export class AuthController {
   @ApiOkResponse({ description: 'current user' })
   async user(@Req() request: Request, @Res() response: Response) {
     try {
+      console.log('herea')
+
       const user = await this.AuthService.findOne({ _id: request['user'].id });
+      console.log(user)
       const userDto: UserDto = {
         id: user._id,
         name: user.name,
@@ -121,20 +137,67 @@ export class AuthController {
     }
   }
 
-  // not required in company task TODO
-
   // 1- regenerate access token from refresh token
+  @Post('refresh')
+  @ApiOkResponse({ description: 'Access token refreshed successfully' })
+  async refresh(
+    @Body() data: { refreshToken: string },
+    @Res() response: Response,
+  ) {
+    try {
+      const decodedRefreshToken = await this.jwtService.verifyAsync(
+        data.refreshToken,
+        {
+          secret: process.env.JWT_SECRET,
+        },
+      );
+
+      const user = await this.AuthService.findOne({
+        _id: decodedRefreshToken.id,
+      });
+
+      if (!user || user.refreshToken !== data.refreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const newAccessToken = await this.jwtService.signAsync(
+        { id: user._id },
+        { expiresIn: '1h', secret: process.env.JWT_SECRET },
+      );
+
+      return response.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Access token refreshed successfully',
+        data: {
+          token: newAccessToken,
+        },
+      });
+    } catch (e) {
+      throw new UnauthorizedException(e.message);
+    }
+  }
 
   /*
-   * 2- this is and enpoint to logout the TO DO in register we shoud created for user refresh token
-   * this endpoint should remove it
+   * 2- this is and enpoint to logout the userby deleting refresh token form user
    */
   @Post('logout')
-  @ApiOkResponse()
-  async logout(@Res() response: Response) {
-    //delete refresh token
-    return {
-      message: 'success',
-    };
+  @UseGuards(JWTGuard)
+  @ApiOkResponse({ description: 'Logged out successfully' })
+  async logout(@Req() request: Request, @Res() response: Response) {
+    const user = await this.AuthService.findOne({ _id: request['user'].id });
+    if (!user) {
+      throw new BadRequestException(['invalid user']);
+    }
+    this.AuthService.updateUser(user._id, {
+      ...user,
+      refreshToken: null,
+    }).catch(err=>{
+      throw new BadRequestException(['faild to log out']);
+    });
+
+    return response.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
+      message: 'Logged out successfully',
+    });
   }
 }
