@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Logger,
   Post,
   Req,
   Res,
@@ -52,6 +53,7 @@ export class AuthController {
       name: user.name,
       email: user.email,
     };
+    Logger.log(`new customer registered with id ${userDto.id}`)
     return response.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: 'Registered',
@@ -95,6 +97,7 @@ export class AuthController {
       name: user.name,
       email: user.email,
     };
+    Logger.log(`new customer logged in with id ${userDto.id}`)
 
     return response.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
